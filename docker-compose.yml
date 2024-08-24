@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-ecommerce-zippin-app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "80:80"
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    container_name: api-ecommerce-zippin-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ecommerce_zippin_db
+      MYSQL_USER: ecommerce_zippin
+      MYSQL_PASSWORD: ecommerce_zippin
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  dbdata:
