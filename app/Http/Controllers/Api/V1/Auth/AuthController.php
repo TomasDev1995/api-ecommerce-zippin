@@ -5,65 +5,79 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginUserRequest;
 use App\Http\Requests\Auth\RegisterUserRequest;
-use App\Models\User;
+use App\Services\Auth\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     use ApiResponse;
+
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
     
     /**
-     * Register a new user.
+     * Register a new Customer.
      */
-    public function register(RegisterUserRequest $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+    public function customerRegister(RegisterUserRequest $request)
+    {        
+        $registerResultCustomer = $this->authService->customerRegister($request->validated());
+        
+        if (!$registerResultCustomer) {
+            return $this->error("Error al registrar el usuario.", 400, $registerResultCustomer);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-        return response()->json(['user' => $user, 'token' => $token], 201);
+        return $this->success($registerResultCustomer, "Usuario registrado exitosamente!", 201);
     }
 
     /**
-     * Login a user.
+     * Login a Customer.
      */
-    public function login(LoginUserRequest $request)
+    public function customerLogin(LoginUserRequest $request)
+    {        
+        $loginResultCustomer = $this->authService->customerLogin($request->validated());
+        
+        if (!$loginResultCustomer['success']) {
+            return $this->error($loginResultCustomer['message'], 400, $loginResultCustomer['data']);
+        }
+
+        return $this->success($loginResultCustomer['data'], $loginResultCustomer['message'], 200);
+    }
+
+    /**
+     * Register a new Admin.
+     */
+    public function adminRegister(RegisterUserRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        $validatedData = $request->validated();
+        
+        $registratedAdminUser = $this->authService->adminRegister($validatedData);
+        
+        if (!$registratedAdminUser) {
+            return $this->error("", 400, $registratedAdminUser);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        return $this->success($registratedAdminUser, "Usuario registrado exitosamente!", 201);
+    }
+
+    /**
+     * Login a admin.
+     */
+    public function adminLogin(LoginUserRequest $request)
+    {
+        
+        $loginResultAdmin = $this->authService->adminLogin($request->validated());
+        
+        if (!$loginResultAdmin) {
+            return $this->error("", 400, $loginResultAdmin);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-        return response()->json(['user' => $user, 'token' => $token]);
+        return $this->success($loginResultAdmin['data'], $loginResultAdmin['message'], 200);
     }
 
     /**
@@ -72,27 +86,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = Auth::user();
-        $user->tokens()->delete();
+        //$user->tokens()->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    /**
-     * Get the authenticated user's information.
-     */
-    public function me(Request $request)
-    {
-        return response()->json($request->user());
-    }
-
-    /**
-     * Refresh the user's token.
-     */
-    public function refresh(Request $request)
-    {
-        $user = Auth::user();
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-        return response()->json(['token' => $token]);
     }
 }

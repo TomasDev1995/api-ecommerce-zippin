@@ -38,4 +38,12 @@ class CustomerUserController extends Controller
 
         return response()->json($user);
     }
+
+    /**
+     * Get the authenticated user's information.
+     */
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
+    }
 }
