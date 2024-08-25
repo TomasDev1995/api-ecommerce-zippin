@@ -4,10 +4,9 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 
-use App\Policies\User\AdminPolicy;
-use App\Policies\User\CustomerPolicy;
+use App\Models\Order;
+use App\Policies\Order\OrderPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -17,7 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        Order::class => OrderPolicy::class,
     ];
 
     /**
@@ -26,8 +25,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-
-        Gate::policy('admin', AdminPolicy::class);
-        Gate::policy('customer', CustomerPolicy::class);
     }
 }
