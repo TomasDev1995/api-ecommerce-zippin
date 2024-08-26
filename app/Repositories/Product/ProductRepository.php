@@ -4,6 +4,7 @@ namespace App\Repositories\Product;
 
 use App\Models\Product;
 use App\Repositories\Product\ProductRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class ProductRepository implements ProductRepositoryInterface{
     
@@ -19,6 +20,8 @@ class ProductRepository implements ProductRepositoryInterface{
 
     public function create(array $data)
     {
-        return Product::create($data);
+        $product = Product::create($data);
+        Cache::forget('products.all');
+        return $product;
     }
 }

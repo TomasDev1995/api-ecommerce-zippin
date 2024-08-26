@@ -3,6 +3,7 @@
 namespace App\Services\Product;
 
 use App\Repositories\Product\ProductRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class ProductService {
 
@@ -15,7 +16,11 @@ class ProductService {
 
     public function getAll()
     {
-        return $this->productRepository->getAll();
+        // Consultamos primero la caché
+        return Cache::remember('products.all', 60, function () {
+            // Delegamos la obtención de productos al repositorio si es que no encontramos en la caché.
+            return $this->productRepository->getAll();
+        });
     }
 
     public function findById(?int $id)

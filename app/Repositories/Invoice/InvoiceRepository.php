@@ -3,6 +3,7 @@
 namespace App\Repositories\Invoice;
 
 use App\Models\Invoice;
+use Exception;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
@@ -19,12 +20,27 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     /**
      * Crea una nueva factura.
      *
-     * @param  array  $data
+     * @param array $data
      * @return \App\Models\Invoice
      */
     public function create(array $data)
     {
-        return Invoice::create($data);
+        try {
+            $invoice = Invoice::create([
+                'order_id' => $data['order_id'],
+                'invoice_number' => $data['invoice_number'],
+                'issued_at' => $data['issued_at'], // Fecha de emisión
+                'total_amount' => $data['total_amount'], // Monto total
+                'billing_address' => $data['billing_address'], // Dirección de facturación
+                'billing_city' => $data['billing_city'], // Ciudad de facturación
+                'billing_state' => $data['billing_state'], // Estado/Provincia de facturación
+                'billing_postal_code' => $data['billing_postal_code'], // Código postal de facturación
+                'billing_country' => $data['billing_country'], // País de facturación
+            ]);
+            return $invoice;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
     }
 
     /**

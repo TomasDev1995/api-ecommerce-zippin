@@ -10,6 +10,7 @@ use App\Repositories\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\Order\OrderRepositoryInterface;
 use App\Repositories\OrderDetail\OrderDetailRepositoryInterface;
 use App\Repositories\Product\ProductRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -51,6 +52,7 @@ class OrderService
         DB::beginTransaction();
         try {
             $order = $this->orderRepository->create($data);
+            
             foreach ($data["products"] as $product) {
                 $productData = [
                     'order_id' => $order->id,
@@ -59,14 +61,14 @@ class OrderService
                     'price' => $product['price'],
                     'total' => $product['quantity'] * $product['price'],
                 ];
-                
                 $this->orderDetailRepository->create($productData);
+
             }
 
             $invoiceData = [
                 'order_id' => $order->id,
                 'invoice_number' => $this->generateInvoiceNumber(),
-                'issued_at' => now(),
+                'issued_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'total_amount' => $order->total_amount,
                 'billing_address' => $data['billing_address'],
                 'billing_city' => $data['billing_city'],
@@ -74,11 +76,13 @@ class OrderService
                 'billing_postal_code' => $data['billing_postal_code'],
                 'billing_country' => $data['billing_country'],
             ];
-
+            
             $this->invoiceRepository->create($invoiceData);
+
             NotifyOrderCreate::dispatch($order);
             
             DB::commit();
+
             $order->load('orderDetails.product','invoice');
             
             return [
