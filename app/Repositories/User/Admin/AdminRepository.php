@@ -5,7 +5,7 @@ namespace App\Repositories\User\Admin;
 use App\Models\User;
 use App\Services\Security\PasswordService;
 
-class AdminRepository {
+class AdminRepository implements AdminRepositoryInterface{
 
     protected $passwordService;
     
@@ -20,7 +20,7 @@ class AdminRepository {
      * @param array $data
      * @return \App\Models\User
      */
-    public function create(array $data)
+    public function create(?array $data)
     {
         return User::create([
             'name' => $data['name'],
@@ -30,12 +30,12 @@ class AdminRepository {
         ]);
     }
 
-     /**
+    /**
      * Busca un usuario por su email.
      *
      * @param string $email
      * @return \App\Models\User|null
-     */
+    */
     public function findByEmail(?string $email)
     {
         return User::where('email', $email)->first();

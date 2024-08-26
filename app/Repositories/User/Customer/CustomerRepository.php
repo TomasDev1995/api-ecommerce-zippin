@@ -36,7 +36,7 @@ class CustomerRepository {
      * @param string $email
      * @return \App\Models\User|null
      */
-    public function findByEmail(?string $email)
+     public function findByEmail(?string $email)
     {
         return User::where('email', $email)->first();
     }

@@ -60,7 +60,7 @@ class AuthService {
         }
 
         // Verificar la contraseña
-        if (!$this->customerRepository->verifyPassword($data['password'], $user->password)) {
+        if (!$this->customerRepository->verifyPassword($data['password'], $user)) {
             return [
                 'success' => false,
                 'message' => 'Contraseña incorrecta.',
