@@ -8,6 +8,17 @@ use App\Http\Controllers\Api\V1\User\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\User\Customer\CustomerController;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * @OA\Info(
+ *     title="API Documentation",
+ *     version="1.0.0",
+ *     description="API documentation for your application",
+ *     @OA\Contact(
+ *         email="support@example.com"
+ *     )
+ * )
+ */
+
 // Prefix para la versión de la API
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'customerRegister'])->name('customer.register');

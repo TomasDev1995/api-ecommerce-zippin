@@ -19,9 +19,23 @@ class OrderController extends Controller
     }
 
     /**
-     * Muestra una lista de órdenes.
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/v1/orders",
+     *     summary="List all orders",
+     *     tags={"Orders"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of orders",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Order")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No orders found"
+     *     )
+     * )
      */
     public function index()
     {
@@ -35,10 +49,27 @@ class OrderController extends Controller
     }
 
     /**
-     * Crea una nueva orden.
-     *
-     * @param  \App\Http\Requests\Order\CreateOrderRequest  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/v1/orders",
+     *     summary="Create a new order",
+     *     tags={"Orders"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/CreateOrderRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Order created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error creating order"
+     *     )
+     * )
      */
     public function create(CreateOrderRequest $request)
     {
@@ -52,10 +83,27 @@ class OrderController extends Controller
     }
 
     /**
-     * Muestra los detalles de una orden específica por id.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/v1/orders/{id}",
+     *     summary="Get order details by ID",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order details",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found"
+     *     )
+     * )
      */
     public function show(int $id)
     {
@@ -69,11 +117,34 @@ class OrderController extends Controller
     }
 
     /**
-     * Actualiza una orden existente.
-     *
-     * @param  \App\Http\Requests\Order\UpdateOrderRequest  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/api/v1/orders/{id}",
+     *     summary="Update an existing order",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/UpdateOrderRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error updating order"
+     *     )
+     * )
      */
     public function update(UpdateOrderRequest $request, int $id)
     {
@@ -87,10 +158,26 @@ class OrderController extends Controller
     }
 
     /**
-     * Elimina una orden existente.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Delete(
+     *     path="/api/v1/orders/{id}",
+     *     summary="Delete an existing order",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order deleted successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error deleting order"
+     *     )
+     * )
      */
     public function destroy(int $id)
     {

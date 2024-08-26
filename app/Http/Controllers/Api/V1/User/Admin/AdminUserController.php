@@ -8,10 +8,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @OA\Tag(name="Admin User", description="Admin user management")
+ */
 class AdminUserController extends Controller
 {
     /**
-     * Display a listing of the users.
+     * @OA\Get(
+     *     path="/api/v1/admin/users",
+     *     summary="Display a listing of the users",
+     *     tags={"Admin User"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Returns a list of users",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/User"))
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
      */
     public function index()
     {
@@ -20,7 +36,27 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Store a newly created user in storage.
+     * @OA\Post(
+     *     path="/api/v1/admin/users",
+     *     summary="Store a newly created user in storage",
+     *     tags={"Admin User"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -39,7 +75,27 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Display the specified user.
+     * @OA\Get(
+     *     path="/api/v1/admin/users/{id}",
+     *     summary="Display the specified user",
+     *     tags={"Admin User"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Returns the user details",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function show(User $user)
     {
@@ -47,7 +103,34 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Update the specified user in storage.
+     * @OA\Put(
+     *     path="/api/v1/admin/users/{id}",
+     *     summary="Update the specified user in storage",
+     *     tags={"Admin User"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function update(Request $request, User $user)
     {
@@ -68,7 +151,29 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Remove the specified user from storage.
+     * @OA\Delete(
+     *     path="/api/v1/admin/users/{id}",
+     *     summary="Remove the specified user from storage",
+     *     tags={"Admin User"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function destroy(User $user)
     {

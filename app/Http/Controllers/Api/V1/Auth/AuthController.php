@@ -22,7 +22,27 @@ class AuthController extends Controller
     }
     
     /**
-     * Register a new Customer.
+     * @OA\Post(
+     *     path="/api/v1/auth/customer/register",
+     *     summary="Register a new Customer",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/RegisterUserRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Customer registered successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error registering user"
+     *     )
+     * )
      */
     public function customerRegister(RegisterUserRequest $request)
     {        
@@ -36,7 +56,30 @@ class AuthController extends Controller
     }
 
     /**
-     * Login a Customer.
+     * @OA\Post(
+     *     path="/api/v1/auth/customer/login",
+     *     summary="Login a Customer",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/LoginUserRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="your_jwt_token"),
+     *             @OA\Property(property="message", type="string", example="Login successful")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid credentials"
+     *     )
+     * )
      */
     public function customerLogin(LoginUserRequest $request)
     {        
@@ -50,7 +93,27 @@ class AuthController extends Controller
     }
 
     /**
-     * Register a new Admin.
+     * @OA\Post(
+     *     path="/api/v1/auth/admin/register",
+     *     summary="Register a new Admin",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/RegisterUserRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Admin registered successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error registering admin"
+     *     )
+     * )
      */
     public function adminRegister(RegisterUserRequest $request)
     {   
@@ -64,7 +127,30 @@ class AuthController extends Controller
     }
 
     /**
-     * Login a admin.
+     * @OA\Post(
+     *     path="/api/v1/auth/admin/login",
+     *     summary="Login an Admin",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/LoginUserRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="your_jwt_token"),
+     *             @OA\Property(property="message", type="string", example="Login successful")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid credentials"
+     *     )
+     * )
      */
     public function adminLogin(LoginUserRequest $request)
     {
@@ -79,7 +165,23 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout the user (revoke the token).
+     * @OA\Post(
+     *     path="/api/v1/auth/logout",
+     *     summary="Logout the user (revoke the token)",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Successfully logged out")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
      */
     public function logout(Request $request)
     {
@@ -89,6 +191,25 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/customer/logout",
+     *     summary="Logout a customer (revoke the token)",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Successfully logged out.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function customerLogout(Request $request)
     {
         $user = Auth::user();
@@ -97,6 +218,25 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out.']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/admin/logout",
+     *     summary="Logout an admin (revoke the token)",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Successfully logged out.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function adminLogout(Request $request)
     {
         $user = Auth::user();
