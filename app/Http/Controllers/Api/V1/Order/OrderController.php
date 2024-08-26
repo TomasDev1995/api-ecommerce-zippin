@@ -40,19 +40,19 @@ class OrderController extends Controller
      * @param  \App\Http\Requests\Order\CreateOrderRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(CreateOrderRequest $request)
+    public function create(CreateOrderRequest $request)
     {
-        $order = $this->orderService->create($request->validated());
-
-        if (!$order) {
-            return $this->error("No se pudo crear la orden.", 500);
+        $order = $this->orderService->createOrder($request->validated());
+        
+        if (isset($order['error'])) {
+            return $this->error($order['error'], 500, $order);
         }
 
-        return $this->success($order, "Orden creada exitosamente.", 201);
+        return $this->success($order['order'], $order['message'], 201);
     }
 
     /**
-     * Muestra los detalles de una orden específica.
+     * Muestra los detalles de una orden específica por id.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
@@ -77,8 +77,7 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, int $id)
     {
-        $validatedData = $request->validated();
-        $order = $this->orderService->update($id, $validatedData);
+        $order = $this->orderService->update($id, $request->validated());
 
         if (!$order) {
             return $this->error("No se pudo actualizar la orden.", 500);

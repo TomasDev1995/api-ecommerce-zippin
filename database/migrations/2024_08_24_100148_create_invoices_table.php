@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->string('invoice_number')->unique();
             $table->date('issued_at');
-            $table->decimal('total_amount');
+            $table->decimal('total_amount', 10, 2);
             $table->string('billing_address')->nullable();;
             $table->string('billing_city');
             $table->string('billing_state');

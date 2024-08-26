@@ -21,6 +21,18 @@ class OrderPolicy
     }
 
     /**
+     * Determina si el usuario puede crear un pedido.
+     *
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    public function create(User $user)
+    {
+        // Solo los clientes pueden crear pedidos
+        return $user->role === 'customer';
+    }
+
+    /**
      * Determina si el usuario puede actualizar el pedido.
      *
      * @param \App\Models\User $user
@@ -31,20 +43,6 @@ class OrderPolicy
     {
         // Los administradores pueden actualizar cualquier pedido
         // Los clientes solo pueden actualizar sus propios pedidos si el estado es "pendiente"
-        return $user->role === 'admin' || ($user->id === $order->user_id && $order->status === 'pending');
-    }
-
-    /**
-     * Determina si el usuario puede cancelar el pedido.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\Order $order
-     * @return bool
-     */
-    public function cancel(User $user, Order $order)
-    {
-        // Los administradores pueden cancelar cualquier pedido
-        // Los clientes solo pueden cancelar sus propios pedidos si el estado es "pendiente"
         return $user->role === 'admin' || ($user->id === $order->user_id && $order->status === 'pending');
     }
 

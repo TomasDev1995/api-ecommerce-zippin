@@ -23,11 +23,10 @@ class ProductController extends Controller
     {
         $products = $this->productService->getAll();
 
-        if (empty($products)) {
+        if ($products->isEmpty()) {
             return $this->error("No hay productos cargados.", 404);
         }
-        
-        return $this->success($products);
+        return $this->success( $products->toArray());
     }
 
     public function store(CreateProductRequest $request)
@@ -54,8 +53,7 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, int $id)
     {
-        $validatedData = $request->validated();
-        $product = $this->productService->update($id, $validatedData);
+        $product = $this->productService->update($id, $request->validated());
 
         if (!$product) {
             return $this->error("No se pudo actualizar el producto.", 500);

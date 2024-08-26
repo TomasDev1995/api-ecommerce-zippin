@@ -23,9 +23,9 @@ class ProductService {
         return $this->productRepository->findById($id);
     }
 
-    public function create()
+    public function create(array $data)
     {
-        //
+        return $this->productRepository->create($data);
     }
 
     public function update()

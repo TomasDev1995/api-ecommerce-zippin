@@ -26,7 +26,7 @@ class AdminRepository implements AdminRepositoryInterface{
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $this->passwordService->hashPassword($data['password']),
-            'role' => 'Admin'
+            'role' => 'admin'
         ]);
     }
 

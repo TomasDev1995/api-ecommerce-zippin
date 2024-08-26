@@ -4,6 +4,7 @@ namespace App\Repositories\Order;
 
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class OrderRepository implements OrderRepositoryInterface
 {
@@ -14,18 +15,41 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function getAll(): Collection
     {
-        return Order::all();
+        return Order::where('user_id', Auth::id())->get();
     }
 
     /**
      * Crea una nueva orden.
      *
-     * @param array $data Los datos de la orden a crear.
+     * @param int $userId
+     * @param string $orderNumber
+     * @param string $status
+     * @param float $totalAmount
+     * @param string $shippingAddress
+     * @param string $billingAddress
+     * @param string $paymentMethod
+     * @param string $paymentStatus
+     * @param string $orderDate
+     * @param string|null $shippingDate
+     * @param string|null $notes
      * @return \App\Models\Order
      */
-    public function create(array $data): Order
+    public function create(array $data): Order 
     {
-        return Order::create($data);
+        $user = Auth::user();
+        return Order::create([
+            'user_id' => $user->id,
+            'order_number' => $data['order_number'],
+            'status' => $data['status'],
+            'total_amount' => $data['total_amount'],
+            'shipping_address' => $data['shipping_address'],
+            'billing_address' => $data['billing_address'],
+            'payment_method' => $data['payment_method'],
+            'payment_status' => $data['payment_status'],
+            'order_date' => $data['order_date'],
+            'shipping_date' => $data['shipping_date'],
+            'notes' => $data['notes'],
+        ]);
     }
 
     /**

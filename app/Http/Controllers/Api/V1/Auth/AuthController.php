@@ -53,10 +53,8 @@ class AuthController extends Controller
      * Register a new Admin.
      */
     public function adminRegister(RegisterUserRequest $request)
-    {
-        $validatedData = $request->validated();
-        
-        $registratedAdminUser = $this->authService->adminRegister($validatedData);
+    {   
+        $registratedAdminUser = $this->authService->adminRegister($request->validated());
         
         if (!$registratedAdminUser) {
             return $this->error("", 400, $registratedAdminUser);
@@ -89,5 +87,21 @@ class AuthController extends Controller
         //$user->tokens()->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function customerLogout(Request $request)
+    {
+        $user = Auth::user();
+        $user->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Successfully logged out.']);
+    }
+
+    public function adminLogout(Request $request)
+    {
+        $user = Auth::user();
+        $user->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Successfully logged out.']);
     }
 }

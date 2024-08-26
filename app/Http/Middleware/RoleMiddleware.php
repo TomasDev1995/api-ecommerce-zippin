@@ -19,7 +19,11 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role): Response
     {
         // Asegúrate de que el usuario está autenticado
-        if (!$request->user() || !$request->user()->hasRole($role)) {
+        if (!$request->user()){
+            return response()->json(['message' => 'No estás autenticado.'], 401);
+        } 
+
+        if(!$request->user()->hasRole($role)) {
             return response()->json(['message' => 'No tienes permiso para acceder a esta ruta.'], 403);
         }
 
