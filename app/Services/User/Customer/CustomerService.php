@@ -2,14 +2,14 @@
 
 namespace App\Services\User\customer;
 
-use App\Repositories\User\Customer\CustomerRepository;
+use App\Repositories\User\Customer\CustomerRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 
 class CustomerService {
 
     protected $customerRepository;
 
-    public function __construct(CustomerRepository $customerRepository)
+    public function __construct(CustomerRepositoryInterface $customerRepository)
     {
         $this->customerRepository = $customerRepository;
     }

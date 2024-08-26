@@ -22,8 +22,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); 
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update'); 
-        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     });
     Route::prefix('admin')->group(function () {
         Route::post('/login', [AuthController::class, 'adminLogin'])->name('admin.login');

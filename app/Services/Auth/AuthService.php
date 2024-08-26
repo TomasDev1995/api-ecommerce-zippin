@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Jobs\Auth\Customer\SendWelcomeEmail;
 use App\Repositories\User\Customer\CustomerRepository;
 use App\Repositories\User\Admin\AdminRepository;
 
@@ -36,7 +37,9 @@ class AuthService {
      */
     public function customerRegister(?array $data)
     {
-        return $this->customerRepository->create($data);
+        $user = $this->customerRepository->create($data);
+        SendWelcomeEmail::dispatch($user);
+        return $user;
     }
 
     /**
