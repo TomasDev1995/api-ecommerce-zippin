@@ -28,14 +28,14 @@ class OrderService
         $this->productRepository = $productRepository;
         $this->invoiceRepository = $invoiceRepository;
     }
-    
+
     /**
      * Obtiene todas las órdenes.
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll()
-    {   
+    {
         $orders = $this->orderRepository->getAll();
         $orders->load('orderDetails.product');
         return $orders->toArray();
@@ -44,27 +44,27 @@ class OrderService
     public function createOrder(array $data)
     {
         DB::beginTransaction();
-    
+
         try {
             $order = $this->createOrderRecord($data);
             $this->createOrderDetails($data, $order);
             $this->createInvoice($data, $order);
             $this->notifyOrderCreation($order);
-    
+
             DB::commit();
-    
+
             $order->load('orderDetails.product', 'invoice');
-    
+
             return [
                 'order' => $order,
                 'message' => 'Orden creada con éxito.'
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['error' => 'Error al crear la orden. Error: '.$e->getMessage(), 500];
+            return ['error' => 'Error al crear la orden. Error: ' . $e->getMessage(), 500];
         }
     }
-    
+
     /**
      * Crea el registro de la orden en la base de datos.
      *
@@ -75,7 +75,7 @@ class OrderService
     {
         return $this->orderRepository->create($data);
     }
-    
+
     /**
      * Crea los detalles de la orden en la base de datos.
      *
@@ -96,7 +96,7 @@ class OrderService
             $this->orderDetailRepository->create($productData);
         }
     }
-    
+
     /**
      * Crea la factura para la orden en la base de datos.
      *
@@ -117,10 +117,10 @@ class OrderService
             'billing_postal_code' => $data['billing_postal_code'],
             'billing_country' => $data['billing_country'],
         ];
-    
+
         $this->invoiceRepository->create($invoiceData);
     }
-    
+
     /**
      * Notifica la creación de la orden.
      *
@@ -131,7 +131,17 @@ class OrderService
     {
         NotifyOrderCreate::dispatch($order);
     }
-    
+
+    /**
+     * Notifica la creación de la orden.
+     *
+     * @param \App\Models\Order $order La orden recién creada.
+     * @return void
+     */
+    protected function notifyOrderChangeStatus(Order $order)
+    {
+        NotifyOrderStatusUpdate::dispatch($order);
+    }
 
     /**
      * Encuentra una orden por su ID.
@@ -153,40 +163,19 @@ class OrderService
      * @param array $data Los datos actualizados de la orden.
      * @return \App\Models\Order|null
      */
-    public function update(int $id, array $data)
-    {
-        DB::beginTransaction();
-        try {
-            $order = $this->orderRepository->update($id, $data);
-            NotifyOrderStatusUpdate::dispatch($order);
 
-            DB::commit();
-            return $order->toArray();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return ['error' => 'Error al actualizar el estado de la orden. Error: '.$e->getMessage(), 500];
-        }
-    }
-
-        /**
-     * Actualiza una orden existente.
-     *
-     * @param int $id El ID de la orden.
-     * @param array $data Los datos actualizados de la orden.
-     * @return \App\Models\Order|null
-     */
     public function setStatusOrder(int $id, array $data)
     {
         DB::beginTransaction();
         try {
             $order = $this->orderRepository->setStatus($id, $data['status']);
-            NotifyOrderStatusUpdate::dispatch($order);
+            $this->notifyOrderChangeStatus($order);
 
             DB::commit();
             return $order->toArray();
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['error' => 'Error al actualizar el estado de la orden. Error: '.$e->getMessage(), 500];
+            return ['error' => 'Error al actualizar el estado de la orden. Error: ' . $e->getMessage(), 500];
         }
     }
 

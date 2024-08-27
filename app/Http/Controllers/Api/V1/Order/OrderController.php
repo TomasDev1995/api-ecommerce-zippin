@@ -54,7 +54,7 @@ class OrderController extends Controller
 
     public function update(UpdateOrderRequest $request, int $id)
     {
-        $order = $this->orderService->update($id, $request->validated());
+        $order = $this->orderService->setStatusOrder($id, $request->validated());
 
         if (!$order) {
             return $this->error("No se pudo actualizar la orden.", 500);
