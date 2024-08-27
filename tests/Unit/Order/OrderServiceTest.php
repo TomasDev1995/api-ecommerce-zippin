@@ -61,8 +61,8 @@ class OrderServiceTest extends TestCase
     protected function createOrderModel(): Order
     {
         return new Order([
-            'id' => 1,
-            'user_id' => 1,
+            'id' => 14,
+            'user_id' => 4,
             'order_number' => 'ORD12360-test-unit',
             'status' => 'pending',
             'total_amount' => 100.00,
@@ -82,7 +82,7 @@ class OrderServiceTest extends TestCase
     {
         return (object)[
             'id' => 1,
-            'order_id' => 1,
+            'order_id' => 14,
             'product_id' => 1,
             'quantity' => 2,
             'price' => 50.00
@@ -92,7 +92,7 @@ class OrderServiceTest extends TestCase
     protected function createInvoice()
     {
         return (object)[
-            'order_id' => 1,
+            'order_id' => 14,
             'invoice_number' => 'INV-1001',
             'total_amount' => 100.00,
             'billing_address' => 'Don Bosco 64, Ciudad de Quilmes',
@@ -115,7 +115,7 @@ class OrderServiceTest extends TestCase
     protected function getOrderData(): array
     {
         return [
-            'user_id' => 1,
+            'user_id' => 4,
             'order_number' => 'ORD12350',
             'status' => 'pending',
             'total_amount' => 100.00,
@@ -150,7 +150,7 @@ class OrderServiceTest extends TestCase
     protected function assertOrderCreated($order, array $data)
     {
         $this->assertNotNull($order);
-        $this->assertEquals(1, $order->id);
+        $this->assertEquals(1, $order['order']->id);
         $this->assertEquals($data['user_id'], $order['order']->user_id);
         $this->assertEquals($data['total_amount'], $order['order']->total_amount);
     }

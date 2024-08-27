@@ -15,7 +15,11 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function getAll(): Collection
     {
-        return Order::where('user_id', Auth::id())->get();
+        $user = Auth::user();
+        if(!$user->role != "customer"){
+            return Order::all();
+        }
+        return Order::where('user_id', $user->id)->get();
     }
 
     /**

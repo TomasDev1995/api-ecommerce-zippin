@@ -30,11 +30,15 @@ Route::prefix('v1')->group(function () {
         Route::get('/users/me', [CustomerController::class, 'show'])->name('users.show');
         // Gestión de Productos (solo para el cliente)
         Route::get('/products', [ProductController::class, 'index'])->name('customer.products.index');
+        
         Route::get('/products/{id}', [ProductController::class, 'show'])->name('customer.products.show');
         // Gestión de Órdenes (solo para el cliente)
         Route::get('/orders', [OrderController::class, 'index'])->name('customer.orders.index');
+        
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('customer.orders.show'); 
+        
         Route::post('/orders', [OrderController::class, 'create'])->name('customer.orders.store');
+        
         Route::put('orders/{id}', [OrderController::class, 'cancel'])->name('customer.orders.cancel');
     });
     Route::prefix('admin')->group(function () {
@@ -46,7 +50,11 @@ Route::prefix('v1')->group(function () {
             // Gestión de Productos
             Route::apiResource('products', ProductController::class);
             // Gestión de Órdenes
-            Route::apiResource('orders', OrderController::class);
+            Route::get('orders', [OrderController::class, 'index']);
+
+            Route::get('orders/{id}', [OrderController::class, 'show']);
+
+            Route::put('orders/{id}', [OrderController::class, 'update']);
         });
     });
 });
