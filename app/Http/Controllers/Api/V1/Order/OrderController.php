@@ -156,38 +156,5 @@ class OrderController extends Controller
 
         return $this->success($order, "Orden actualizada exitosamente.");
     }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/orders/{id}",
-     *     summary="Delete an existing order",
-     *     tags={"Orders"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Order ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Order deleted successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Error deleting order"
-     *     )
-     * )
-     */
-    public function destroy(int $id)
-    {
-        $result = $this->orderService->delete($id);
-
-        if (!$result) {
-            return $this->error("No se pudo eliminar la orden.", 500);
-        }
-
-        return $this->success(null, "Orden eliminada exitosamente.");
-    }
 }
 
