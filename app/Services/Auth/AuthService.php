@@ -71,6 +71,11 @@ class AuthService {
             ];
         }
 
+        $userToken = $user->tokens()->first();
+        if ($userToken) {
+            $userToken->delete();
+        }
+
         // Generar el token de acceso
         if (!$token = $user->createToken("Personal Access Token")) {
             return [

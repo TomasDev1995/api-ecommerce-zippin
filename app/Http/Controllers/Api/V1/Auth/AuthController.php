@@ -212,10 +212,10 @@ class AuthController extends Controller
      */
     public function customerLogout(Request $request)
     {
-        $user = Auth::user();
-        $user->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->tokens()->delete();
 
-        return response()->json(['message' => 'Successfully logged out.']);
+        return response()->json(['message' => 'Cliente deslogueado.']);
     }
 
     /**
@@ -239,9 +239,9 @@ class AuthController extends Controller
      */
     public function adminLogout(Request $request)
     {
-        $user = Auth::user();
-        $user->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->tokens()->delete();
 
-        return response()->json(['message' => 'Successfully logged out.']);
+        return response()->json(['message' => 'Admin deslogueado.']);
     }
 }
