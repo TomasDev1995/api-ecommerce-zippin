@@ -7,6 +7,19 @@ use App\Models\User;
 
 class OrderPolicy
 {
+
+        /**
+     * Determina si el usuario puede crear un pedido.
+     *
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    public function create(User $user)
+    {
+        // Solo los usuarios con el rol 'customer' pueden crear un pedido
+        return $user->role === 'customer';
+    }
+    
     /**
      * Determina si el usuario puede actualizar el pedido.
      *

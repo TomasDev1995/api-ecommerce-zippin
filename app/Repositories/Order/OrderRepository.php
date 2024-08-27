@@ -89,7 +89,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @return \App\Models\Order
      * @throws \Exception Si la orden no se encuentra.
      */
-    public function setStatus(int $id, string $status): string
+    public function setStatus(int $id, string $status): Order
     {
         $order = Order::find($id);
 
