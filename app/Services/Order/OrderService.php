@@ -61,7 +61,7 @@ class OrderService
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['error' => 'Error al crear la orden. Error: ' . $e->getMessage(), 500];
+            return ['error' => $e->getMessage(), 500];
         }
     }
 
@@ -129,6 +129,7 @@ class OrderService
      */
     protected function notifyOrderCreation(Order $order)
     {
+        //dd($order);
         NotifyOrderCreate::dispatch($order);
     }
 
