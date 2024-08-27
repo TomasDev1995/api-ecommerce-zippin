@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Order;
 
+use PhpParser\Node\Expr\Cast\String_;
+
 interface OrderRepositoryInterface
 {
     /**
@@ -35,6 +37,15 @@ interface OrderRepositoryInterface
      * @return \App\Models\Order|null
      */
     public function update(int $id, array $data);
+
+    /**
+     * Actualiza el estado una orden existente.
+     *
+     * @param int $id El ID de la orden.
+     * @param array $status estado a setear.
+     * @return \App\Models\Order|null
+     */
+    public function setStatus(int $id, string $status);
 
     /**
      * Elimina una orden existente.

@@ -168,6 +168,28 @@ class OrderService
         }
     }
 
+        /**
+     * Actualiza una orden existente.
+     *
+     * @param int $id El ID de la orden.
+     * @param array $data Los datos actualizados de la orden.
+     * @return \App\Models\Order|null
+     */
+    public function setStatusOrder(int $id, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $order = $this->orderRepository->setStatus($id, $data['status']);
+            NotifyOrderStatusUpdate::dispatch($order);
+
+            DB::commit();
+            return $order->toArray();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ['error' => 'Error al actualizar el estado de la orden. Error: '.$e->getMessage(), 500];
+        }
+    }
+
     /**
      * Elimina una orden existente.
      *

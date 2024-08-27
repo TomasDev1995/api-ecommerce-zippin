@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Order;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdateOrderRequest extends FormRequest
 {
@@ -14,15 +13,9 @@ class UpdateOrderRequest extends FormRequest
      */
     public function authorize()
     {
-        $order = $this->route('order');
-
-        // Asegúrate de que la política de actualización también permita la cancelación
-        if ($this->input('status') === 'canceled') {
-            return Gate::allows('update', $order);
-        }
-
-        // Para otros tipos de actualización
-        return Gate::allows('update', $order);
+        // Aquí puedes definir la lógica para autorizar el acceso a esta solicitud.
+        // En este caso, retornamos true para permitir el acceso.
+        return true;
     }
 
     /**
@@ -33,7 +26,7 @@ class UpdateOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => 'sometimes|required|in:pending,completed,shipped,canceled',
+            'status' => 'sometimes|required|in:pending,completed,shipped,canceled', // Opcional, pero si se proporciona, debe ser uno de los valores permitidos
         ];
     }
 

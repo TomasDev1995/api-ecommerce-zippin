@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\V1\Order;
 
 use App\Http\Controllers\Controller;
@@ -15,7 +16,7 @@ class OrderController extends Controller
 
     public function __construct(OrderService $orderService)
     {
-        $this->orderService = $orderService;        
+        $this->orderService = $orderService;
     }
 
     /**
@@ -74,7 +75,7 @@ class OrderController extends Controller
     public function create(CreateOrderRequest $request)
     {
         $order = $this->orderService->createOrder($request->validated());
-        
+
         if (isset($order['error'])) {
             return $this->error($order['error'], 500, $order);
         }
@@ -156,5 +157,98 @@ class OrderController extends Controller
 
         return $this->success($order, "Orden actualizada exitosamente.");
     }
-}
 
+    /**
+     * @OA\Put(
+     *     path="/api/v1/orders/{id}",
+     *     summary="Update an existing order",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/UpdateOrderRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error updating order"
+     *     )
+     * )
+     */
+    public function cancel(UpdateOrderRequest $request, int $id)
+    {
+        $order = $this->orderService->setStatusOrder($id, $request->validated());
+
+        if (!$order) {
+            return $this->error("No se pudo actualizar la orden.", 500);
+        }
+
+        return $this->success($order, "Orden actualizada exitosamente.");
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/orders/{id}/complete",
+     *     summary="Complete an existing order",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="status",
+     *                     type="string",
+     *                     example="completed",
+     *                     description="The new status of the order."
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order completed successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid status provided"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error completing order"
+     *     )
+     * )
+     */
+    public function complete(UpdateOrderRequest $request, int $id)
+    {
+        $order = $this->orderService->setStatusOrder($id, $request->validated());
+
+        if (!$order) {
+            return $this->error("No se pudo actualizar la orden.", 500);
+        }
+
+        return $this->success($order, "Orden completada exitosamente.");
+    }
+}

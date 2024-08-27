@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'customerRegister'])->name('customer.register');
     Route::post('/login', [AuthController::class, 'customerLogin'])->name('customer.login');
-    Route::middleware(['auth:sanctum', 'role:customer', 'ensureTokenMatchesUser'])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'customerLogout'])->name('customer.logout');
 
         // Gestión de Usuarios (solo para el cliente)
@@ -35,13 +35,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('customer.orders.index');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('customer.orders.show'); 
         Route::post('/orders', [OrderController::class, 'create'])->name('customer.orders.store');
-        Route::put('orders/{id}', [OrderController::class, 'update'])->name('customer.orders.update');
+        Route::put('orders/{id}', [OrderController::class, 'cancel'])->name('customer.orders.cancel');
     });
     Route::prefix('admin')->group(function () {
         Route::post('/login', [AuthController::class, 'adminLogin'])->name('admin.login');
         Route::post('/register', [AuthController::class, 'adminRegister'])->name('admin.register');
         // Middleware para autenticación de admin
-        Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+        Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/logout', [AuthController::class, 'adminLogout'])->name('admin.logout');
             // Gestión de Productos
             Route::apiResource('products', ProductController::class);

@@ -1,4 +1,5 @@
-<?php
+<?php 
+
 namespace App\Policies\Order;
 
 use App\Models\Order;
@@ -6,32 +7,6 @@ use App\Models\User;
 
 class OrderPolicy
 {
-    /**
-     * Determina si el usuario puede ver el pedido.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\Order $order
-     * @return bool
-     */
-    public function view(User $user, Order $order)
-    {
-        // Los administradores pueden ver cualquier pedido
-        // Los clientes solo pueden ver sus propios pedidos
-        return $user->role === 'admin' || $user->id === $order->user_id;
-    }
-
-    /**
-     * Determina si el usuario puede crear un pedido.
-     *
-     * @param \App\Models\User $user
-     * @return bool
-     */
-    public function create(User $user)
-    {
-        // Solo los clientes pueden crear pedidos
-        return $user->role === 'customer';
-    }
-
     /**
      * Determina si el usuario puede actualizar el pedido.
      *
@@ -41,21 +16,20 @@ class OrderPolicy
      */
     public function update(User $user, Order $order)
     {
-        // Los administradores pueden actualizar cualquier pedido
-        // Los clientes solo pueden actualizar sus propios pedidos si el estado es "pendiente"
-        return $user->role === 'admin' || ($user->id === $order->user_id && $order->status === 'pending');
+        // Solo el administrador puede actualizar el estado a cualquier otro estado.
+        return $user->role === 'admin';
     }
 
     /**
-     * Determina si el usuario puede eliminar el pedido.
+     * Determina si el usuario puede cancelar el pedido.
      *
      * @param \App\Models\User $user
      * @param \App\Models\Order $order
      * @return bool
      */
-    public function delete(User $user, Order $order)
+    public function cancel(User $user, Order $order)
     {
-        // Solo los administradores pueden eliminar pedidos
-        return $user->role === 'admin';
+        // El cliente puede cancelar su propio pedido si está pendiente.
+        return $user->id === $order->user_id && $order->status === 'pending';
     }
 }

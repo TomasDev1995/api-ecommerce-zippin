@@ -34,7 +34,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @param string|null $notes
      * @return \App\Models\Order
      */
-    public function create(array $data): Order 
+    public function create(array $data): Order
     {
         $user = Auth::user();
         return Order::create([
@@ -80,6 +80,29 @@ class OrderRepository implements OrderRepositoryInterface
 
         return $order;
     }
+
+    /**
+     * Actualiza el estado de la orden.
+     *
+     * @param int $id El ID de la orden.
+     * @param string $status El nuevo estado de la orden.
+     * @return \App\Models\Order
+     * @throws \Exception Si la orden no se encuentra.
+     */
+    public function setStatus(int $id, string $status): string
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            throw new \Exception("Orden no encontrada.");
+        }
+
+        $order->status = $status;
+        $order->save();
+
+        return $order;
+    }
+
 
     /**
      * Elimina una orden existente.
