@@ -2,14 +2,12 @@
 
 namespace App\Services\Order;
 
-use App\Jobs\Order\NotifyOrderCreate;
-use App\Jobs\Order\NotifyOrderStatusUpdate;
+use App\Jobs\Order\NotifyOrderCreateJob;
+use App\Jobs\Order\NotifyOrderStatusUpdateJob;
 use App\Models\Order;
-use App\Models\OrderDetail;
 use App\Repositories\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\Order\OrderRepositoryInterface;
 use App\Repositories\OrderDetail\OrderDetailRepositoryInterface;
-use App\Repositories\Product\ProductRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -17,16 +15,16 @@ class OrderService
 {
 
     protected $orderRepository;
-    protected $productRepository;
     protected $orderDetailRepository;
     protected $invoiceRepository;
+    protected $notifyJob;
 
-    public function __construct(OrderRepositoryInterface $orderRepository, OrderDetailRepositoryInterface $orderDetailRepository, ProductRepositoryInterface $productRepository, InvoiceRepositoryInterface $invoiceRepository)
+    public function __construct(OrderRepositoryInterface $orderRepository, OrderDetailRepositoryInterface $orderDetailRepository, InvoiceRepositoryInterface $invoiceRepository, NotifyOrderCreateJob $notifyJob)
     {
         $this->orderRepository = $orderRepository;
         $this->orderDetailRepository = $orderDetailRepository;
-        $this->productRepository = $productRepository;
         $this->invoiceRepository = $invoiceRepository;
+        $this->notifyJob = $notifyJob;
     }
 
     /**
@@ -44,17 +42,14 @@ class OrderService
     public function createOrder(array $data)
     {
         DB::beginTransaction();
-
         try {
             $order = $this->createOrderRecord($data);
             $this->createOrderDetails($data, $order);
             $this->createInvoice($data, $order);
             $this->notifyOrderCreation($order);
-
             DB::commit();
-
+            
             $order->load('orderDetails.product', 'invoice');
-
             return [
                 'order' => $order,
                 'message' => 'Orden creada con éxito.'
@@ -129,8 +124,7 @@ class OrderService
      */
     protected function notifyOrderCreation(Order $order)
     {
-        //dd($order);
-        NotifyOrderCreate::dispatch($order);
+        $this->notifyJob::dispatchSync($order);
     }
 
     /**
@@ -141,7 +135,7 @@ class OrderService
      */
     protected function notifyOrderChangeStatus(Order $order)
     {
-        NotifyOrderStatusUpdate::dispatch($order);
+        NotifyOrderStatusUpdateJob::dispatch($order);
     }
 
     /**

@@ -26,7 +26,10 @@ class AuthServiceTest extends TestCase
         parent::setUp();
 
         $this->mockRepositories();
-        $this->authService = new AuthService($this->customerRepositoryMock, $this->adminRepositoryMock);
+        $this->authService = new AuthService(
+            $this->customerRepositoryMock, 
+            $this->adminRepositoryMock
+        );
     }
 
     /**

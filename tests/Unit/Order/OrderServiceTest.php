@@ -1,83 +1,66 @@
-<?php
-
+<?php 
 namespace Tests\Unit\Order;
 
+use App\Jobs\Order\NotifyOrderCreateJob;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Repositories\Invoice\InvoiceRepositoryInterface;
+use App\Repositories\Order\OrderRepositoryInterface;
+use App\Repositories\OrderDetail\OrderDetailRepositoryInterface;
 use Tests\TestCase;
 use App\Services\Order\OrderService;
-use Carbon\Carbon;
 use Mockery;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 
 class OrderServiceTest extends TestCase
 {
     protected $orderService;
     protected $orderRepositoryMock;
     protected $orderDetailRepositoryMock;
-    protected $productRepositoryMock;
     protected $invoiceRepositoryMock;
+    protected $notifyOrderCreateJob;
 
-    /**
-     * Configura el entorno de prueba antes de cada prueba.
-     * Aquí se inicializan los mocks y el servicio de órdenes.
-     */
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->mockRepositories();
-        // Inicializa el servicio de órdenes con los mocks
+        $this->mocks();
         $this->orderService = new OrderService(
             $this->orderRepositoryMock,
             $this->orderDetailRepositoryMock,
-            $this->productRepositoryMock,
-            $this->invoiceRepositoryMock
+            $this->invoiceRepositoryMock,
+            $this->notifyOrderCreateJob
         );
     }
 
-    /**
-     * Prueba la función de creación de una orden en el servicio de órdenes.
-     * Se verifica si la orden se crea correctamente.
-     */
-    public function testCreateOrder()
-    {
-        // Datos para crear una orden
-        $data = $this->getOrderData();
-
-        // Llama al método createOrder del servicio
-        $order = $this->orderService->createOrder($data);
-        
-        // Verifica que la orden fue creada correctamente
-        $this->assertOrderCreated($order, $data);
-    }
-
-    /**
-     * Configura los mocks de los repositorios utilizados en las pruebas.
-     * Los métodos esperados y los valores de retorno son definidos aquí.
-     */
-    protected function mockRepositories()
+    protected function mocks()
     {
         // Mock del repositorio de órdenes
-        $this->orderRepositoryMock = Mockery::mock('App\Repositories\Order\OrderRepositoryInterface');
+        $this->orderRepositoryMock = Mockery::mock(OrderRepositoryInterface::class);
+        $order = Mockery::mock(Order::class);
+        $order->shouldReceive('load')->with('orderDetails.product', 'invoice')->andReturnSelf();
         $this->orderRepositoryMock->shouldReceive('create')
-            ->andReturn($this->createOrderModel());
+            ->once()
+            ->andReturn($order);
 
         // Mock del repositorio de detalles de órdenes
-        $this->orderDetailRepositoryMock = Mockery::mock('App\Repositories\OrderDetail\OrderDetailRepositoryInterface');
+        $this->orderDetailRepositoryMock = Mockery::mock(OrderDetailRepositoryInterface::class);
         $this->orderDetailRepositoryMock->shouldReceive('create')
             ->once()
-            ->andReturn($this->createOrderDetailModel());
-
-        // Mock del repositorio de productos
-        $this->productRepositoryMock = Mockery::mock('App\Repositories\Product\ProductRepositoryInterface');
+            ->andReturn(new OrderDetail());
 
         // Mock del repositorio de facturas
-        $this->invoiceRepositoryMock = Mockery::mock('App\Repositories\Invoice\InvoiceRepositoryInterface');
+        $this->invoiceRepositoryMock = Mockery::mock(InvoiceRepositoryInterface::class);
         $this->invoiceRepositoryMock->shouldReceive('create')
             ->once()
-            ->andReturn($this->createInvoiceModel());
+            ->andReturn(new Invoice());
+
+        $this->notifyOrderCreateJob = Mockery::mock(NotifyOrderCreateJob::class);
+        $this->notifyOrderCreateJob->shouldReceive('dispatchSync')
+            ->once()
+            ->andReturn(null);
 
         // Mock de transacciones de base de datos
         DB::shouldReceive('beginTransaction')->once()->andReturnNull();
@@ -85,77 +68,24 @@ class OrderServiceTest extends TestCase
         DB::shouldReceive('rollBack')->once()->andReturnNull();
     }
 
-    /**
-     * Crea un modelo de orden para pruebas.
-     * 
-     * @return Order
-     */
-    protected function createOrderModel(): Order
+    public function testCreateOrder()
     {
-        return new Order([
-            'id' => 14,
-            'user_id' => 4,
-            'order_number' => 'ORD12356',
-            'status' => 'pending',
-            'total_amount' => 100.00,
-            'shipping_address' => 'Don Bosco 64, Ciudad de Quilmes',
-            'billing_address' => 'Don Bosco 64, Ciudad de Quilmes',
-            'payment_method' => 'tarjeta_de_credito',
-            'payment_status' => 'pagado',
-            'order_date' => Carbon::parse('2024-08-26'),
-            'shipping_date' => Carbon::parse('2024-08-30'),
-            'notes' => 'Creacion de pedido de prueba numero 2',
-            'billing_city' => 'Ciudad de Quilmes',
-            'billing_state' => 'Buenos Aires',
-            'billing_postal_code' => '1878',
-            'billing_country' => 'Argentina',
-        ]);
+        $data = $this->getOrderData();
+        $order = $this->orderService->createOrder($data);
+        $this->notifyOrderCreateJob->shouldHaveReceived('dispatchSync')
+        ->once();
+
+        $this->assertNotNull($order);
+        $this->assertEquals(1, $order['order']->id);
+        $this->assertEquals($data['user_id'], $order['order']->user_id);
+        $this->assertEquals($data['total_amount'], $order['order']->total_amount);
     }
 
-    /**
-     * Crea un modelo de detalle de orden para pruebas.
-     * 
-     * @return OrderDetail
-     */
-    protected function createOrderDetailModel(): OrderDetail
-    {
-        return new OrderDetail([
-            'id' => 1,
-            'order_id' => 14,
-            'product_id' => 1,
-            'quantity' => 2,
-            'price' => 50.00
-        ]);
-    }
-
-    /**
-     * Crea un modelo de factura para pruebas.
-     * 
-     * @return Invoice
-     */
-    protected function createInvoiceModel(): Invoice
-    {
-        return new Invoice([
-            'order_id' => 14,
-            'invoice_number' => 'INV-1001',
-            'total_amount' => 100.00,
-            'billing_address' => 'Don Bosco 64, Ciudad de Quilmes',
-            'billing_city' => 'Ciudad de Quilmes',
-            'billing_state' => 'Buenos Aires',
-            'billing_postal_code' => '1878',
-            'billing_country' => 'Argentina',
-        ]);
-    }
-
-    /**
-     * Proporciona datos de prueba para crear una orden.
-     * 
-     * @return array
-     */
     protected function getOrderData(): array
     {
         return [
-            'order_number' => 'ORD12356',
+            'user_id' => 50,
+            'order_number' => 't-ORD12367',
             'status' => 'pending',
             'total_amount' => 100.00,
             'shipping_address' => 'Don Bosco 64, Ciudad de Quilmes',
@@ -179,17 +109,9 @@ class OrderServiceTest extends TestCase
         ];
     }
 
-    /**
-     * Verifica que la orden haya sido creada correctamente.
-     * 
-     * @param $order
-     * @param array $data
-     */
-    protected function assertOrderCreated($order, array $data)
+    protected function tearDown(): void
     {
-        $this->assertNotNull($order);
-        $this->assertEquals(1, $order['order']->id);
-        $this->assertEquals($data['user_id'], $order['order']->user_id);
-        $this->assertEquals($data['total_amount'], $order['order']->total_amount);
+        Mockery::close();
+        parent::tearDown();
     }
 }

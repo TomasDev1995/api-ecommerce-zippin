@@ -40,9 +40,8 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function create(array $data): Order
     {
-        $user = Auth::user();
-        return Order::create([
-            'user_id' => $user->id,
+        $order = Order::create([
+            'user_id' =>Auth::user()->id,
             'order_number' => $data['order_number'],
             'status' => $data['status'],
             'total_amount' => $data['total_amount'],
@@ -54,6 +53,8 @@ class OrderRepository implements OrderRepositoryInterface
             'shipping_date' => $data['shipping_date'],
             'notes' => $data['notes'],
         ]);
+        dd($order);
+        return $order; 
     }
 
     /**
