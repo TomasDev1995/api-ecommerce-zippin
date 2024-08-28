@@ -3,7 +3,7 @@
 namespace App\Jobs\Order;
 
 use App\Models\Order;
-use App\Notifications\Order\OrderStatusUpdated;
+use App\Notifications\Order\OrderStatusUpdatedNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,6 +37,6 @@ class NotifyOrderStatusUpdateJob implements ShouldQueue
         // Aquí puedes usar la lógica de notificación que prefieras
         // Ejemplo:
         $user = $this->order->user;
-        $user->notify(new OrderStatusUpdated($this->order));
+        $user->notify(new OrderStatusUpdatedNotification($this->order));
     }
 }

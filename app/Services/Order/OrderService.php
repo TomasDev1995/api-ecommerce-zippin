@@ -17,14 +17,16 @@ class OrderService
     protected $orderRepository;
     protected $orderDetailRepository;
     protected $invoiceRepository;
-    protected $notifyJob;
+    protected $notifyOrderCreateJob;
+    protected $notifyOrderUpdateJob;
 
-    public function __construct(OrderRepositoryInterface $orderRepository, OrderDetailRepositoryInterface $orderDetailRepository, InvoiceRepositoryInterface $invoiceRepository, NotifyOrderCreateJob $notifyJob)
+    public function __construct(OrderRepositoryInterface $orderRepository, OrderDetailRepositoryInterface $orderDetailRepository, InvoiceRepositoryInterface $invoiceRepository, NotifyOrderCreateJob $notifyOrderCreateJob, NotifyOrderStatusUpdateJob $notifyOrderUpdateJob)
     {
         $this->orderRepository = $orderRepository;
         $this->orderDetailRepository = $orderDetailRepository;
         $this->invoiceRepository = $invoiceRepository;
-        $this->notifyJob = $notifyJob;
+        $this->notifyOrderCreateJob = $notifyOrderCreateJob;
+        $this->notifyOrderUpdateJob = $notifyOrderUpdateJob;
     }
 
     /**
@@ -124,7 +126,7 @@ class OrderService
      */
     protected function notifyOrderCreation(Order $order)
     {
-        $this->notifyJob::dispatchSync($order);
+        $this->notifyOrderCreateJob::dispatchSync($order);
     }
 
     /**
@@ -135,7 +137,7 @@ class OrderService
      */
     protected function notifyOrderChangeStatus(Order $order)
     {
-        NotifyOrderStatusUpdateJob::dispatch($order);
+        $this->notifyOrderUpdateJob::dispatchSync($order);
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace App\Jobs\Order;
 
 use App\Models\Order;
-use App\Notifications\Order\OrderCreated;
+use App\Notifications\Order\OrderCreatedNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -34,7 +34,7 @@ class NotifyOrderCreateJob implements ShouldQueue
     public function handle(): void
     {
         $user = $this->order->user;
-        $user->notify(new OrderCreated($this->order));
+        $user->notify(new OrderCreatedNotification($this->order));
     }
 }
 

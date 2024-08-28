@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class OrderStatusUpdated extends Notification implements ShouldQueue
+class OrderCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -18,7 +18,6 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
      * Create a new notification instance.
      *
      * @param \App\Models\Order $order
-     * @return void
      */
     public function __construct(Order $order)
     {
@@ -45,7 +44,7 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('El estado de su pedido ha sido actualizado.')
+                    ->line('Su pedido ha sido creado con éxito.')
                     ->line('Pedido ID: ' . $this->order->id)
                     ->line('Estado: ' . $this->order->status)
                     ->line('Gracias por usar nuestra aplicación!');
