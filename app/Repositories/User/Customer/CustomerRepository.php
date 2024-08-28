@@ -22,7 +22,6 @@ class CustomerRepository {
      */
     public function create(array $data)
     {
-        //Por defecto "role:customer".
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],

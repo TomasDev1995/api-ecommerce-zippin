@@ -5,6 +5,8 @@ namespace App\Services\Auth;
 use App\Jobs\Auth\Customer\SendWelcomeEmail;
 use App\Repositories\User\Customer\CustomerRepository;
 use App\Repositories\User\Admin\AdminRepository;
+use App\Repositories\User\Admin\AdminRepositoryInterface;
+use App\Repositories\User\Customer\CustomerRepositoryInterface;
 
 class AuthService {
 
@@ -23,7 +25,7 @@ class AuthService {
      *
      * @param CustomerRepository $customerRepository
      */
-    public function __construct(CustomerRepository $customerRepository, AdminRepository $adminRepository)
+    public function __construct(CustomerRepositoryInterface $customerRepository, AdminRepositoryInterface $adminRepository)
     {
         $this->customerRepository = $customerRepository;
         $this->adminRepository = $adminRepository;
@@ -35,10 +37,10 @@ class AuthService {
      * @param array|null $data Los datos del cliente a registrar.
      * @return \App\Models\User El usuario creado.
      */
-    public function customerRegister(?array $data)
+    public function customerRegister(array $data)
     {
         $user = $this->customerRepository->create($data);
-        SendWelcomeEmail::dispatch($user);
+        $this->sendWelcomeNotification($user);
         return $user;
     }
 
@@ -148,6 +150,11 @@ class AuthService {
                 ]
             ]
         ];
+    }
+
+    protected function sendWelcomeNotification($user)
+    {
+        SendWelcomeEmail::dispatchSync($user);
     }
 
 }

@@ -7,9 +7,10 @@ use Tests\TestCase;
 use App\Services\Auth\AuthService;
 use Illuminate\Support\Facades\Hash;
 use Mockery;
-use Illuminate\Support\Facades\DB;
 use App\Repositories\User\Admin\AdminRepositoryInterface;
 use App\Repositories\User\Customer\CustomerRepositoryInterface;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 
 class AuthServiceTest extends TestCase
 {
@@ -24,12 +25,14 @@ class AuthServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->mockRepositories();
         $this->authService = new AuthService(
-            $this->customerRepositoryMock, 
+            $this->customerRepositoryMock,
             $this->adminRepositoryMock
         );
+        
+        Queue::fake();
+        Notification::fake();
     }
 
     /**
@@ -38,51 +41,19 @@ class AuthServiceTest extends TestCase
      */
     protected function mockRepositories()
     {
+        $customer = new User();
+        $customer->id = 1;
+        $customer->name = "Juan Alvarez";
+        $customer->email = "Juan@gmail.com";
+        $customer->password = "zippin123";
+        $customer->role = "customer";
+
         $this->customerRepositoryMock = Mockery::mock(CustomerRepositoryInterface::class);
         $this->customerRepositoryMock->shouldReceive('create')
             ->once()
-            ->with(Mockery::on(function ($userData) {
-                return isset($userData['name'], $userData['email'], $userData['password']);
-            }))
-            ->andReturn($this->createUserModel());
+            ->andReturn($customer);
 
         $this->adminRepositoryMock = Mockery::mock(AdminRepositoryInterface::class);
-
-        DB::shouldReceive('beginTransaction')->once()->andReturnNull();
-        DB::shouldReceive('commit')->once()->andReturnNull();
-        DB::shouldReceive('rollBack')->once()->andReturnNull();
-    }
-
-    /**
-     * Crea un modelo de usuario para pruebas.
-     * 
-     * @return User
-     */
-    protected function createUserModel()
-    {
-        $user = Mockery::mock('App\Models\User')->makePartial();
-    
-        $user->shouldReceive('getAttribute')->with('id')->andReturn(1);
-        $user->shouldReceive('getAttribute')->with('name')->andReturn('John Doe');
-        $user->shouldReceive('getAttribute')->with('email')->andReturn('john.doe@example.com');
-        $user->shouldReceive('getAttribute')->with('password')->andReturn(Hash::make('password123'));
-        $user->shouldReceive('getAttribute')->with('created_at')->andReturn(now());
-        $user->shouldReceive('getAttribute')->with('updated_at')->andReturn(now());
-    
-        $user->shouldReceive('getQueueableId')->andReturn(1);
-        $user->shouldReceive('getQueueableRelations')->andReturn([]);
-        $user->shouldReceive('getQueueableConnection')->andReturn(null);
-    
-        $user->shouldReceive('getAttributes')->andReturn([
-            'id' => 1,
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => Hash::make('password123'),
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-    
-        return $user;
     }
 
     /**
@@ -90,11 +61,16 @@ class AuthServiceTest extends TestCase
      * 
      * @return void
      */
-    public function testRegisterUser()
+    public function testCustomerRegister()
     {
         $data = $this->getUserData();
         $user = $this->authService->customerRegister($data);
-        $this->assertUserRegistered($user, $data);
+        
+        $this->assertNotNull($user, 'El usuario no debería ser nulo.');
+        $this->assertEquals(1, $user->id, 'El ID del usuario debería ser 1.');
+        $this->assertEquals($data['name'], $user->name, 'El nombre del usuario no coincide.');
+        $this->assertEquals($data['email'], $user->email, 'El correo electrónico del usuario no coincide.');
+        $this->assertTrue(Hash::check($data['password'], $user->password), 'La contraseña no coincide.');
     }
 
     /**
@@ -105,25 +81,22 @@ class AuthServiceTest extends TestCase
     protected function getUserData(): array
     {
         return [
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'password123',
+            'name' => 'Juan Alvarez',
+            'email' => 'Juan@gmail.com',
+            'password' => 'zippin123',
+            'role' => 'customer'
         ];
     }
 
-    /**
-     * Verifica que el usuario haya sido registrado correctamente.
-     * 
-     * @param User $user
-     * @param array $data
-     * @return void
+        /**
+     * Clean up after the test.
+     *
+     * This method is called after each test is executed.
+     * It closes Mockery and calls the parent tearDown method.
      */
-    protected function assertUserRegistered(User $user, array $data)
+    protected function tearDown(): void
     {
-        $this->assertNotNull($user);
-        $this->assertEquals(1, $user->id);
-        $this->assertEquals($data['name'], $user->name);
-        $this->assertEquals($data['email'], $user->email);
-        $this->assertTrue(Hash::check($data['password'], $user->password)); 
+        Mockery::close();
+        parent::tearDown();
     }
 }

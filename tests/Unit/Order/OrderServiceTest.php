@@ -53,6 +53,7 @@ class OrderServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
         $this->mocks();
         $this->orderService = new OrderService(
             $this->orderRepositoryMock,
